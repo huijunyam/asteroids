@@ -81,12 +81,11 @@
 	const Asteroid = __webpack_require__(3);
 
 	function Game () {
-	  this.NUM_ASTEROIDS = 2;
-	  this.DIM_X = 300;
-	  this.DIM_Y = 300;
+	  this.NUM_ASTEROIDS = 200;
+	  this.DIM_X = 1000;
+	  this.DIM_Y = 1000;
 	  this.asteroids = [];
 	  this.addAsteroids();
-	  console.log(this.asteroids[5]);
 	}
 
 	Game.prototype.generateRandomPos = function () {
@@ -95,7 +94,7 @@
 
 	Game.prototype.addAsteroids = function () {
 	  for (let i = 0; i < this.NUM_ASTEROIDS; i++){
-	    this.asteroids.push(new Asteroid({pos: this.generateRandomPos()}));
+	    this.asteroids.push(new Asteroid({game: this, pos: this.generateRandomPos()}));
 	  }
 	};
 
@@ -109,28 +108,32 @@
 	Game.prototype.moveObjects = function() {
 	  for (let i = 0; i < this.NUM_ASTEROIDS; i++) {
 	    this.asteroids[i].move();
-	    if(this.asteroids[i].pos[0] > this.DIM_X) {
-	      this.asteroids[i].pos[0] = 0;
-	    }
-
-	    if(this.asteroids[i].pos[0] < 0) {
-	      this.asteroids[i].pos[0] = this.DIM_X;
-	    }
-
-	    if(this.asteroids[i].pos[1] > this.DIM_Y) {
-	      this.asteroids[i].pos[1] = 0;
-	    }
-
-	    if(this.asteroids[i].pos[1] < 0) {
-	      this.asteroids[i].pos[1] = this.DIM_Y;
-	    }
-
 	  }
+	};
+
+	Game.prototype.wrap = function(pos, radius) {
+	  if(pos[0] > this.DIM_X - radius) {
+	    pos[0] = radius;
+	  }
+
+	  if(pos[0] < 0 + radius) {
+	    pos[0] = this.DIM_X - radius;
+	  }
+
+	  if(pos[1] > this.DIM_Y - radius) {
+	    pos[1] = radius;
+	  }
+
+	  if(pos[1] < 0 + radius) {
+	    pos[1] = this.DIM_Y - radius;
+	  }
+	  return pos;
 	};
 
 	module.exports = Game;
 
 	// let game = new Game();
+	// console.log(game.wrap([1500, -50]));
 	// console.log(game.generateRandomPos());
 
 
@@ -146,8 +149,9 @@
 	  this.RADIUS = 5;
 	  option['color'] = this.COLOR;
 	  option['radius'] = this.RADIUS;
-	  option['vel']= utils.randomVec(10);
+	  option['vel'] = utils.randomVec(10);
 	  MovingObject.call(this, option);
+	  console.log(option);
 	}
 	utils.inherits(Asteroid, MovingObject);
 
@@ -163,6 +167,7 @@
 	  this.vel = option["vel"];
 	  this.radius = option["radius"];
 	  this.color = option["color"];
+	  this.game = option["game"];
 	}
 
 	MovingObject.prototype.draw = function (ctx) {
@@ -183,6 +188,7 @@
 
 	MovingObject.prototype.move = function () {
 	  this.pos = [this.pos[0] + this.vel[0], this.pos[1] + this.vel[1]];
+	  this.pos = this.game.wrap(this.pos, this.radius);
 	};
 
 	module.exports = MovingObject;

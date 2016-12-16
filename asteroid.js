@@ -6,8 +6,9 @@ function Asteroid(option) {
   this.RADIUS = 5;
   option['color'] = this.COLOR;
   option['radius'] = this.RADIUS;
-  option['vel']= utils.randomVec(10);
+  option['vel'] = utils.randomVec(10);
   MovingObject.call(this, option);
+  console.log(option);
 }
 utils.inherits(Asteroid, MovingObject);
 
