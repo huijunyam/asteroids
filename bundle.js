@@ -66,7 +66,7 @@
 	GameView.prototype.start = function() {
 	  let that = this;
 	  setInterval(function () {
-	    that.game.moveObjects();
+	    that.game.step();
 	    that.game.draw(that.ctx);
 	  }, 20);
 	};
@@ -81,7 +81,7 @@
 	const Asteroid = __webpack_require__(3);
 
 	function Game () {
-	  this.NUM_ASTEROIDS = 200;
+	  this.NUM_ASTEROIDS = 4;
 	  this.DIM_X = 1000;
 	  this.DIM_Y = 1000;
 	  this.asteroids = [];
@@ -100,13 +100,13 @@
 
 	Game.prototype.draw = function(ctx) {
 	  ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
-	  for (let i = 0; i < this.NUM_ASTEROIDS; i++) {
+	  for (let i = 0; i < this.asteroids.length; i++) {
 	    this.asteroids[i].draw(ctx);
 	  }
 	};
 
 	Game.prototype.moveObjects = function() {
-	  for (let i = 0; i < this.NUM_ASTEROIDS; i++) {
+	  for (let i = 0; i < this.asteroids.length; i++) {
 	    this.asteroids[i].move();
 	  }
 	};
@@ -130,6 +130,28 @@
 	  return pos;
 	};
 
+	Game.prototype.checkCollisions = function () {
+	  for (let i = 0; i < this.asteroids.length; i++) {
+	      let currAsteroid = this.asteroids[i];
+	    for (let j = 0; j < this.asteroids.length; j++) {
+	      if (i === j ) continue;
+	      if (currAsteroid.isCollidedWith(this.asteroids[j])) {
+	        currAsteroid.collideWith(this.asteroids[j]);
+	      }
+	    }
+	  }
+	};
+
+	Game.prototype.step = function () {
+	  this.moveObjects();
+	  this.checkCollisions();
+	};
+
+	Game.prototype.remove = function (asteroid) {
+	  let index = this.asteroids.indexOf(asteroid);
+	  this.asteroids.splice(index, 1);
+	};
+
 	module.exports = Game;
 
 	// let game = new Game();
@@ -146,7 +168,7 @@
 
 	function Asteroid(option) {
 	  this.COLOR = '#A69899';
-	  this.RADIUS = 5;
+	  this.RADIUS = 50;
 	  option['color'] = this.COLOR;
 	  option['radius'] = this.RADIUS;
 	  option['vel'] = utils.randomVec(10);
@@ -191,9 +213,31 @@
 	  this.pos = this.game.wrap(this.pos, this.radius);
 	};
 
+	MovingObject.prototype.calcDistance = function(pos1, pos2) {
+	  return Math.sqrt( Math.pow(pos1[0] - pos2[0], 2) +  Math.pow(pos1[1] - pos2[1], 2));
+	};
+
+	MovingObject.prototype.calcNorm = function(pos) {
+	  return this.calcDistance([0,0], pos);
+	};
+
+	MovingObject.prototype.isCollidedWith = function (otherObject) {
+	  let dist = this.calcDistance(this.pos, otherObject.pos);
+	  let rad = this.radius + otherObject.radius;
+	  return dist < rad;
+	};
+
+	MovingObject.prototype.collideWith = function (otherObject) {
+	  this.game.remove(this);
+	  this.game.remove(otherObject);
+	};
+
 	module.exports = MovingObject;
 
-	// const mo = new MovingObject(
+
+
+	// const mo = new MovingObject({pos: [30, 30] });
+	// console.log(mo.calcDistance([0,0], [3, 4]));
 	//   { pos: [30, 30], vel: [10, 10], radius: 5, color: "#00FF00"}
 	// );
 	//

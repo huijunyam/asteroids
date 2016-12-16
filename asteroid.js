@@ -3,7 +3,7 @@ const utils = require('./utils.js');
 
 function Asteroid(option) {
   this.COLOR = '#A69899';
-  this.RADIUS = 5;
+  this.RADIUS = 50;
   option['color'] = this.COLOR;
   option['radius'] = this.RADIUS;
   option['vel'] = utils.randomVec(10);
