@@ -1,6 +1,7 @@
 const MovingObject = require('./moving_object.js');
 const utils = require('./utils.js');
 const Ship = require("./ship.js");
+const Bullet = require("./bullet.js");
 
 function Asteroid(option) {
   this.COLOR = '#A69899';
@@ -17,7 +18,11 @@ Asteroid.prototype.collideWith = function(otherObject) {
   if (otherObject instanceof Ship){
     otherObject.relocate();
     return true;
-  } 
+  } else if (otherObject instanceof Bullet) {
+    this.remove();
+    otherObject.remove();
+    return true;
+  }
 };
 
 module.exports = Asteroid;

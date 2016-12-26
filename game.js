@@ -1,5 +1,6 @@
 const Asteroid = require("./asteroid.js");
 const Ship = require('./ship.js');
+const Bullet = require("./bullet.js");
 
 function Game () {
   this.NUM_ASTEROIDS = 4;
@@ -7,7 +8,8 @@ function Game () {
   this.DIM_Y = 1000;
   this.asteroids = [];
   this.addAsteroids();
-  this.ship = new Ship({pos: this.generateRandomPos(), game: this});
+  this.bullets = [];
+  this.ships = [];
 }
 
 Game.prototype.generateRandomPos = function () {
@@ -18,6 +20,12 @@ Game.prototype.addAsteroids = function () {
   for (let i = 0; i < this.NUM_ASTEROIDS; i++){
     this.asteroids.push(new Asteroid({game: this, pos: this.generateRandomPos()}));
   }
+};
+
+Game.prototype.addShip = function() {
+  const ship = new Ship({pos: this.generateRandomPos(), game: this});
+  this.ships.push(ship);
+  return ship;
 };
 
 Game.prototype.draw = function(ctx) {
@@ -69,13 +77,32 @@ Game.prototype.step = function () {
   this.checkCollisions();
 };
 
-Game.prototype.remove = function (asteroid) {
-  let index = this.asteroids.indexOf(asteroid);
-  this.asteroids.splice(index, 1);
+Game.prototype.allObjects = function () {
+  return [].concat(this.ships, this.asteroids, this.bullets);
 };
 
-Game.prototype.allObjects = function () {
-  return this.asteroids.concat([this.ship]);
+Game.prototype.remove = function (obj) {
+  if (obj instanceof Bullet) {
+    this.bullets.splice(this.bullets.indexOf(obj), 1);
+  } else if (obj instanceof Asteroid) {
+    this.asteroids.splice(this.asteroids.indexOf(obj), 1);
+  } else if (obj instanceof Ship) {
+    this.ships.splice(this.ships.indexOf(obj), 1);
+  } else {
+    throw "error: not a valid object";
+  }
+};
+
+Game.prototype.add = function(obj) {
+  if (obj instanceof Asteroid) {
+    this.asteroids.push(obj);
+  } else if (obj instanceof Bullet) {
+    this.bullets.push(obj);
+  } else if (obj instanceof Ship) {
+    this.ships.push(obj);
+  } else {
+    throw "error: not a valid object";
+  }
 };
 
 module.exports = Game;

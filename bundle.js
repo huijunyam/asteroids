@@ -88,7 +88,7 @@
 	    let move = GameView.MOVES[k];
 	    key(k, function() { that.ship.power(move); });
 	  });
-	  // key("space", function() { that.ship})
+	  key("space", function() { that.ship.fireBullet(); });
 	};
 
 	module.exports = GameView;
@@ -100,6 +100,7 @@
 
 	const Asteroid = __webpack_require__(3);
 	const Ship = __webpack_require__(6);
+	const Bullet = __webpack_require__(8);
 
 	function Game () {
 	  this.NUM_ASTEROIDS = 4;
@@ -107,7 +108,8 @@
 	  this.DIM_Y = 1000;
 	  this.asteroids = [];
 	  this.addAsteroids();
-	  this.ship = new Ship({pos: this.generateRandomPos(), game: this});
+	  this.bullets = [];
+	  this.ships = [];
 	}
 
 	Game.prototype.generateRandomPos = function () {
@@ -118,6 +120,12 @@
 	  for (let i = 0; i < this.NUM_ASTEROIDS; i++){
 	    this.asteroids.push(new Asteroid({game: this, pos: this.generateRandomPos()}));
 	  }
+	};
+
+	Game.prototype.addShip = function() {
+	  const ship = new Ship({pos: this.generateRandomPos(), game: this});
+	  this.ships.push(ship);
+	  return ship;
 	};
 
 	Game.prototype.draw = function(ctx) {
@@ -169,13 +177,32 @@
 	  this.checkCollisions();
 	};
 
-	Game.prototype.remove = function (asteroid) {
-	  let index = this.asteroids.indexOf(asteroid);
-	  this.asteroids.splice(index, 1);
+	Game.prototype.allObjects = function () {
+	  return [].concat(this.ships, this.asteroids, this.bullets);
 	};
 
-	Game.prototype.allObjects = function () {
-	  return this.asteroids.concat([this.ship]);
+	Game.prototype.remove = function (obj) {
+	  if (obj instanceof Bullet) {
+	    this.bullets.splice(this.bullets.indexOf(obj), 1);
+	  } else if (obj instanceof Asteroid) {
+	    this.asteroids.splice(this.asteroids.indexOf(obj), 1);
+	  } else if (obj instanceof Ship) {
+	    this.ships.splice(this.ships.indexOf(obj), 1);
+	  } else {
+	    throw "error: not a valid object";
+	  }
+	};
+
+	Game.prototype.add = function(obj) {
+	  if (obj instanceof Asteroid) {
+	    this.asteroids.push(obj);
+	  } else if (obj instanceof Bullet) {
+	    this.bullets.push(obj);
+	  } else if (obj instanceof Ship) {
+	    this.ships.push(obj);
+	  } else {
+	    throw "error: not a valid object";
+	  }
 	};
 
 	module.exports = Game;
@@ -192,6 +219,7 @@
 	const MovingObject = __webpack_require__(4);
 	const utils = __webpack_require__(5);
 	const Ship = __webpack_require__(6);
+	const Bullet = __webpack_require__(8);
 
 	function Asteroid(option) {
 	  this.COLOR = '#A69899';
@@ -208,7 +236,11 @@
 	  if (otherObject instanceof Ship){
 	    otherObject.relocate();
 	    return true;
-	  } 
+	  } else if (otherObject instanceof Bullet) {
+	    this.remove();
+	    otherObject.remove();
+	    return true;
+	  }
 	};
 
 	module.exports = Asteroid;
@@ -265,6 +297,10 @@
 	  //do nothing
 	};
 
+	MovingObject.prototype.remove = function () {
+	  this.game.remove(this);
+	};
+
 	module.exports = MovingObject;
 
 
@@ -296,7 +332,22 @@
 	  // Scale the length of a vector by the given amount.
 	  scale (vec, m) {
 	    return [vec[0] * m, vec[1] * m];
-	  }
+	  },
+	  // Normalize the length of the vector to 1, maintaining direction.
+	  dir (vec) {
+	    var norm = Util.norm(vec);
+	    return Util.scale(vec, 1 / norm);
+	  },
+	  // Find distance between two points.
+	  dist (pos1, pos2) {
+	    return Math.sqrt(
+	      Math.pow(pos1[0] - pos2[0], 2) + Math.pow(pos1[1] - pos2[1], 2)
+	    );
+	  },
+	  // Find the length of the vector.
+	  norm (vec) {
+	    return Util.dist([0, 0], vec);
+	  },
 	};
 
 
@@ -309,16 +360,18 @@
 
 	const MovingObject = __webpack_require__(4);
 	const utils = __webpack_require__(5);
+	const Bullet = __webpack_require__(8);
 
 	function Ship (option) {
-	  this.RADIUS = 7;
 	  this.COLOR = '#0DB4C8';
 	  this.vel = [0, 0];
-	  option['radius'] = this.RADIUS;
+	  option['radius'] = Ship.RADIUS;
 	  option['color'] = this.COLOR;
 	  option['vel'] = this.vel;
 	  MovingObject.call(this, option);
 	}
+
+	Ship.RADIUS = 15;
 
 	utils.inherits(Ship, MovingObject);
 
@@ -329,6 +382,30 @@
 
 	Ship.prototype.power = function(impulse) {
 	  this.vel = [this.vel[0] + impulse[0], this.vel[1] + impulse[1]];
+	};
+
+	Ship.prototype.fireBullet = function() {
+	  let norm = utils.norm(this.vel);
+
+	  if (norm === 0){
+	    return;
+	  }
+
+	  let relativeVel = utils.scale(
+	    utils.dir(this.vel),
+	    Bullet.SPEED
+	  );
+
+	  let bulletVel = [relativeVel[0] + this.vel[0], relativeVel[1] + this.vel[1]];
+
+	  let bullet = new Bullet({
+	    pos: this.pos,
+	    vel: bulletVel,
+	    color: this.color,
+	    game: this.game
+	  });
+
+	  this.game.add(bullet);
 	};
 
 	module.exports = Ship;
@@ -634,6 +711,26 @@
 	  if(true) module.exports = assignKey;
 
 	})(this);
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const MovingObject = __webpack_require__(4);
+	const utils = __webpack_require__(5);
+
+	function Bullet(option) {
+	  this.RADIUS = 2;
+	  option['radius'] = this.RADIUS;
+	  MovingObject.call(this, option);
+	}
+
+	Bullet.SPEED = 20;
+
+	utils.inherits(Bullet, MovingObject);
+
+	module.exports = Bullet;
 
 
 /***/ }

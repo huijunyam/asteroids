@@ -45,6 +45,10 @@ MovingObject.prototype.collideWith = function (otherObject) {
   //do nothing
 };
 
+MovingObject.prototype.remove = function () {
+  this.game.remove(this);
+};
+
 module.exports = MovingObject;
 
 

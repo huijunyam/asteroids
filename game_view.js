@@ -30,7 +30,7 @@ GameView.prototype.bindKeyHandlers = function() {
     let move = GameView.MOVES[k];
     key(k, function() { that.ship.power(move); });
   });
-  // key("space", function() { that.ship})
+  key("space", function() { that.ship.fireBullet(); });
 };
 
 module.exports = GameView;
