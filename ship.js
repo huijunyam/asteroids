@@ -13,4 +13,9 @@ function Ship (option) {
 
 utils.inherits(Ship, MovingObject);
 
+Ship.prototype.relocate = function() {
+  this.pos = this.game.generateRandomPos();
+  this.vel = [0, 0];
+};
+
 module.exports = Ship;

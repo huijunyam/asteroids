@@ -171,6 +171,7 @@
 
 	const MovingObject = __webpack_require__(4);
 	const utils = __webpack_require__(5);
+	const Ship = __webpack_require__(6);
 
 	function Asteroid(option) {
 	  this.COLOR = '#A69899';
@@ -182,6 +183,13 @@
 	}
 
 	utils.inherits(Asteroid, MovingObject);
+
+	Asteroid.prototype.collideWith = function(otherObject) {
+	  if (otherObject instanceof Ship){
+	    otherObject.relocate();
+	    return true;
+	  } 
+	};
 
 	module.exports = Asteroid;
 
@@ -234,8 +242,7 @@
 	};
 
 	MovingObject.prototype.collideWith = function (otherObject) {
-	  this.game.remove(this);
-	  this.game.remove(otherObject);
+	  //do nothing
 	};
 
 	module.exports = MovingObject;
@@ -294,6 +301,11 @@
 	}
 
 	utils.inherits(Ship, MovingObject);
+
+	Ship.prototype.relocate = function() {
+	  this.pos = this.game.generateRandomPos();
+	  this.vel = [0, 0];
+	};
 
 	module.exports = Ship;
 
