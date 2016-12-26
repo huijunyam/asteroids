@@ -87,7 +87,7 @@
 	  this.DIM_Y = 1000;
 	  this.asteroids = [];
 	  this.addAsteroids();
-	  this.ship = new Ship({pos: this.generateRandomPos, game: this});
+	  this.ship = new Ship({pos: this.generateRandomPos(), game: this});
 	}
 
 	Game.prototype.generateRandomPos = function () {
@@ -136,7 +136,7 @@
 	  for (let i = 0; i < this.allObjects.length; i++) {
 	      let currObj = this.allObjects[i];
 	    for (let j = 0; j < this.allObjects.length; j++) {
-	      if (i === j ) continue;
+	      if (i === j) continue;
 	      if (currObj.isCollidedWith(this.allObjects[j])) {
 	        currObj.collideWith(this.allObjects[j]);
 	      }
@@ -179,8 +179,8 @@
 	  option['radius'] = this.RADIUS;
 	  option['vel'] = utils.randomVec(10);
 	  MovingObject.call(this, option);
-	  console.log(option);
 	}
+
 	utils.inherits(Asteroid, MovingObject);
 
 	module.exports = Asteroid;
@@ -220,7 +220,7 @@
 	};
 
 	MovingObject.prototype.calcDistance = function(pos1, pos2) {
-	  return Math.sqrt( Math.pow(pos1[0] - pos2[0], 2) +  Math.pow(pos1[1] - pos2[1], 2));
+	  return Math.sqrt(Math.pow(pos1[0] - pos2[0], 2) +  Math.pow(pos1[1] - pos2[1], 2));
 	};
 
 	MovingObject.prototype.calcNorm = function(pos) {

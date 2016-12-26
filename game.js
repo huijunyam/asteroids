@@ -7,7 +7,7 @@ function Game () {
   this.DIM_Y = 1000;
   this.asteroids = [];
   this.addAsteroids();
-  this.ship = new Ship({pos: this.generateRandomPos, game: this});
+  this.ship = new Ship({pos: this.generateRandomPos(), game: this});
 }
 
 Game.prototype.generateRandomPos = function () {
@@ -56,7 +56,7 @@ Game.prototype.checkCollisions = function () {
   for (let i = 0; i < this.allObjects.length; i++) {
       let currObj = this.allObjects[i];
     for (let j = 0; j < this.allObjects.length; j++) {
-      if (i === j ) continue;
+      if (i === j) continue;
       if (currObj.isCollidedWith(this.allObjects[j])) {
         currObj.collideWith(this.allObjects[j]);
       }

@@ -8,8 +8,8 @@ function Asteroid(option) {
   option['radius'] = this.RADIUS;
   option['vel'] = utils.randomVec(10);
   MovingObject.call(this, option);
-  console.log(option);
 }
+
 utils.inherits(Asteroid, MovingObject);
 
 module.exports = Asteroid;
