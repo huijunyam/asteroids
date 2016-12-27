@@ -5,7 +5,7 @@ const key = require('./keymaster.js');
 function GameView(ctx) {
   this.game = new Game();
   this.ctx = ctx;
-  this.ship = new Ship();
+  this.ship = this.game.addShip();
 }
 
 GameView.MOVES = {
@@ -16,12 +16,9 @@ GameView.MOVES = {
 };
 
 GameView.prototype.start = function() {
-  let that = this;
   this.bindKeyHandlers();
-  setInterval(function () {
-    that.game.step();
-    that.game.draw(that.ctx);
-  }, 20);
+  this.lastTime = 0;
+  requestAnimationFrame(this.animate.bind(this));
 };
 
 GameView.prototype.bindKeyHandlers = function() {
@@ -31,6 +28,14 @@ GameView.prototype.bindKeyHandlers = function() {
     key(k, function() { that.ship.power(move); });
   });
   key("space", function() { that.ship.fireBullet(); });
+};
+
+GameView.prototype.animate = function(time) {
+  const delta = time - this.lastTime;
+  this.game.step(delta);
+  this.game.draw(this.ctx);
+  this.lastTime = time;
+  requestAnimationFrame(this.animate.bind(this));
 };
 
 module.exports = GameView;

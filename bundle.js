@@ -63,7 +63,7 @@
 	function GameView(ctx) {
 	  this.game = new Game();
 	  this.ctx = ctx;
-	  this.ship = new Ship();
+	  this.ship = this.game.addShip();
 	}
 
 	GameView.MOVES = {
@@ -74,12 +74,9 @@
 	};
 
 	GameView.prototype.start = function() {
-	  let that = this;
 	  this.bindKeyHandlers();
-	  setInterval(function () {
-	    that.game.step();
-	    that.game.draw(that.ctx);
-	  }, 20);
+	  this.lastTime = 0;
+	  requestAnimationFrame(this.animate.bind(this));
 	};
 
 	GameView.prototype.bindKeyHandlers = function() {
@@ -89,6 +86,14 @@
 	    key(k, function() { that.ship.power(move); });
 	  });
 	  key("space", function() { that.ship.fireBullet(); });
+	};
+
+	GameView.prototype.animate = function(time) {
+	  const delta = time - this.lastTime;
+	  this.game.step(delta);
+	  this.game.draw(this.ctx);
+	  this.lastTime = time;
+	  requestAnimationFrame(this.animate.bind(this));
 	};
 
 	module.exports = GameView;
@@ -107,9 +112,9 @@
 	  this.DIM_X = 1000;
 	  this.DIM_Y = 1000;
 	  this.asteroids = [];
-	  this.addAsteroids();
 	  this.bullets = [];
 	  this.ships = [];
+	  this.addAsteroids();
 	}
 
 	Game.prototype.generateRandomPos = function () {
@@ -135,9 +140,9 @@
 	  }
 	};
 
-	Game.prototype.moveObjects = function() {
+	Game.prototype.moveObjects = function(delta) {
 	  for (let i = 0; i < this.allObjects.length; i++) {
-	    this.allObjects[i].move();
+	    this.allObjects[i].move(delta);
 	  }
 	};
 
@@ -172,8 +177,8 @@
 	  }
 	};
 
-	Game.prototype.step = function () {
-	  this.moveObjects();
+	Game.prototype.step = function (delta) {
+	  this.moveObjects(delta);
 	  this.checkCollisions();
 	};
 
@@ -278,8 +283,11 @@
 	  ctx.fill();
 	};
 
-	MovingObject.prototype.move = function () {
-	  this.pos = [this.pos[0] + this.vel[0], this.pos[1] + this.vel[1]];
+	MovingObject.prototype.move = function (delta) {
+	  const velX = this.vel[0] * delta / 20;
+	  const velY = this.vel[1] * delta / 20;
+
+	  this.pos = [this.pos[0] + velX, this.pos[1] + velY];
 	  if (this.game.isOutOfBounds(this.pos)) {
 	    if (this.isWrappable) {
 	      this.pos = this.game.wrap(this.pos, this.radius);

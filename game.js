@@ -7,9 +7,9 @@ function Game () {
   this.DIM_X = 1000;
   this.DIM_Y = 1000;
   this.asteroids = [];
-  this.addAsteroids();
   this.bullets = [];
   this.ships = [];
+  this.addAsteroids();
 }
 
 Game.prototype.generateRandomPos = function () {
@@ -35,9 +35,9 @@ Game.prototype.draw = function(ctx) {
   }
 };
 
-Game.prototype.moveObjects = function() {
+Game.prototype.moveObjects = function(delta) {
   for (let i = 0; i < this.allObjects.length; i++) {
-    this.allObjects[i].move();
+    this.allObjects[i].move(delta);
   }
 };
 
@@ -72,8 +72,8 @@ Game.prototype.checkCollisions = function () {
   }
 };
 
-Game.prototype.step = function () {
-  this.moveObjects();
+Game.prototype.step = function (delta) {
+  this.moveObjects(delta);
   this.checkCollisions();
 };
 
