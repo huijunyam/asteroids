@@ -11,4 +11,6 @@ Bullet.SPEED = 20;
 
 utils.inherits(Bullet, MovingObject);
 
+Bullet.prototype.isWrappable = false;
+
 module.exports = Bullet;

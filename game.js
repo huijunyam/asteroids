@@ -105,6 +105,10 @@ Game.prototype.add = function(obj) {
   }
 };
 
+Game.prototype.isOutOfBounds = function(pos) {
+  return (pos[0] < 0 || pos[0] > this.DIM_X || pos[1] < 0 || pos[1] > this.DIM_Y);
+};
+
 module.exports = Game;
 
 // let game = new Game();

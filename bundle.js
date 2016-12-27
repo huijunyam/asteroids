@@ -58,7 +58,7 @@
 
 	const Game = __webpack_require__(2);
 	const Ship = __webpack_require__(6);
-	const key = __webpack_require__(7);
+	const key = __webpack_require__(8);
 
 	function GameView(ctx) {
 	  this.game = new Game();
@@ -100,7 +100,7 @@
 
 	const Asteroid = __webpack_require__(3);
 	const Ship = __webpack_require__(6);
-	const Bullet = __webpack_require__(8);
+	const Bullet = __webpack_require__(7);
 
 	function Game () {
 	  this.NUM_ASTEROIDS = 4;
@@ -205,6 +205,10 @@
 	  }
 	};
 
+	Game.prototype.isOutOfBounds = function(pos) {
+	  return (pos[0] < 0 || pos[0] > this.DIM_X || pos[1] < 0 || pos[1] > this.DIM_Y);
+	};
+
 	module.exports = Game;
 
 	// let game = new Game();
@@ -219,7 +223,7 @@
 	const MovingObject = __webpack_require__(4);
 	const utils = __webpack_require__(5);
 	const Ship = __webpack_require__(6);
-	const Bullet = __webpack_require__(8);
+	const Bullet = __webpack_require__(7);
 
 	function Asteroid(option) {
 	  this.COLOR = '#A69899';
@@ -276,7 +280,13 @@
 
 	MovingObject.prototype.move = function () {
 	  this.pos = [this.pos[0] + this.vel[0], this.pos[1] + this.vel[1]];
-	  this.pos = this.game.wrap(this.pos, this.radius);
+	  if (this.game.isOutOfBounds(this.pos)) {
+	    if (this.isWrappable) {
+	      this.pos = this.game.wrap(this.pos, this.radius);
+	    } else {
+	      this.remove();
+	    }
+	  }
 	};
 
 	MovingObject.prototype.calcDistance = function(pos1, pos2) {
@@ -300,6 +310,8 @@
 	MovingObject.prototype.remove = function () {
 	  this.game.remove(this);
 	};
+
+	MovingObject.prototype.isWrappable = true;
 
 	module.exports = MovingObject;
 
@@ -360,18 +372,17 @@
 
 	const MovingObject = __webpack_require__(4);
 	const utils = __webpack_require__(5);
-	const Bullet = __webpack_require__(8);
+	const Bullet = __webpack_require__(7);
 
-	function Ship (option) {
+	function Ship(option) {
+	  this.RADIUS = 15;
 	  this.COLOR = '#0DB4C8';
 	  this.vel = [0, 0];
-	  option['radius'] = Ship.RADIUS;
 	  option['color'] = this.COLOR;
+	  option['radius'] = this.RADIUS;
 	  option['vel'] = this.vel;
 	  MovingObject.call(this, option);
 	}
-
-	Ship.RADIUS = 15;
 
 	utils.inherits(Ship, MovingObject);
 
@@ -413,6 +424,28 @@
 
 /***/ },
 /* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const MovingObject = __webpack_require__(4);
+	const utils = __webpack_require__(5);
+
+	function Bullet(option) {
+	  this.RADIUS = 2;
+	  option['radius'] = this.RADIUS;
+	  MovingObject.call(this, option);
+	}
+
+	Bullet.SPEED = 20;
+
+	utils.inherits(Bullet, MovingObject);
+
+	Bullet.prototype.isWrappable = false;
+
+	module.exports = Bullet;
+
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	//     keymaster.js
@@ -711,26 +744,6 @@
 	  if(true) module.exports = assignKey;
 
 	})(this);
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const MovingObject = __webpack_require__(4);
-	const utils = __webpack_require__(5);
-
-	function Bullet(option) {
-	  this.RADIUS = 2;
-	  option['radius'] = this.RADIUS;
-	  MovingObject.call(this, option);
-	}
-
-	Bullet.SPEED = 20;
-
-	utils.inherits(Bullet, MovingObject);
-
-	module.exports = Bullet;
 
 
 /***/ }

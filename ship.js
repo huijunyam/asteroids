@@ -2,16 +2,15 @@ const MovingObject = require('./moving_object.js');
 const utils = require('./utils.js');
 const Bullet = require('./bullet.js');
 
-function Ship (option) {
+function Ship(option) {
+  this.RADIUS = 15;
   this.COLOR = '#0DB4C8';
   this.vel = [0, 0];
-  option['radius'] = Ship.RADIUS;
   option['color'] = this.COLOR;
+  option['radius'] = this.RADIUS;
   option['vel'] = this.vel;
   MovingObject.call(this, option);
 }
-
-Ship.RADIUS = 15;
 
 utils.inherits(Ship, MovingObject);
 
